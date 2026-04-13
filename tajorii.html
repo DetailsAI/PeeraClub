@@ -791,35 +791,7 @@ select option { background: var(--card); }
 
     <div class="section-title">Settings</div>
 
-    <div class="grid-2">
-      <!-- Google Sheets Sync -->
-      <div class="card" style="border-color:var(--blue-dim)">
-        <div class="card-header" style="background:rgba(37,99,235,0.06)">
-          <span class="card-title" style="color:var(--blue-light)">🔗 Google Sheets Sync</span>
-          <span id="gasStatusBadge" style="font-size:0.7rem;padding:2px 9px;border-radius:4px;background:rgba(30,42,66,0.6);color:var(--text-dim)">Not configured</span>
-        </div>
-        <div style="padding:1.25rem">
-          <div class="form-group" style="margin-bottom:1rem">
-            <label>Apps Script Web App URL</label>
-            <input type="url" id="gasUrlInput" placeholder="https://script.google.com/macros/s/…/exec" style="font-size:0.78rem">
-          </div>
-          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
-            <button class="btn btn-gold" onclick="saveGasUrl()">Connect</button>
-            <button class="btn btn-outline" onclick="manualSync()" style="font-size:0.82rem">↻ Sync Now</button>
-            <button class="btn btn-outline" onclick="disconnectGas()" style="font-size:0.82rem;color:var(--red-light);border-color:var(--red-dim)">Disconnect</button>
-          </div>
-          <div id="gasSetupInstructions" style="margin-top:1rem;padding:0.85rem;background:var(--surface);border-radius:8px;font-size:0.78rem;color:var(--text-muted);line-height:1.7">
-            <div style="color:var(--blue-light);font-weight:600;margin-bottom:0.4rem">How to set up:</div>
-            <div>1. Go to <strong style="color:var(--text)">script.google.com</strong> → New Project</div>
-            <div>2. Paste the <strong style="color:var(--text)">PeeraClub_GAS.gs</strong> code</div>
-            <div>3. Deploy → Web App → <strong style="color:var(--text)">Anyone</strong> can access</div>
-            <div>4. Copy the URL and paste above → Connect</div>
-            <div style="margin-top:0.5rem;color:var(--text-dim)">All members share one Google Sheet. Data syncs automatically on every save.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Opening Balance -->
+    <div style="max-width:480px">
       <div class="card">
         <div class="card-header">
           <span class="card-title">Opening Balance</span>
@@ -949,7 +921,7 @@ select option { background: var(--card); }
       <div class="form-grid-3">
         <div class="form-group">
           <label>Description</label>
-          <input type="text" id="exp_desc" placeholder="e.g. Dinner at Savera">
+          <input type="text" id="exp_desc" placeholder="e.g. Dinner at CFU">
         </div>
         <div class="form-group">
           <label>Amount (Rs.)</label>
@@ -1219,6 +1191,7 @@ select option { background: var(--card); }
 // ===================== DATA STORE =====================
 const STORAGE_KEY = 'peeraclub_v1';
 const GAS_URL_KEY  = 'peeraclub_gas_url';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxcYayZ956UPmw4fxPCGUwIJME8bSrhl9w4eDu9sf4mZ-VYcibq5pMFd98QbvcNnk3qGg/exec';
 
 const DEFAULT_DATA = {
   openingBalance: 0,
@@ -1230,22 +1203,15 @@ const DEFAULT_DATA = {
 };
 
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
-let GAS_URL = localStorage.getItem(GAS_URL_KEY) || '';
 let syncPending = false;
 
 // ---- Sync UI helpers ----
 function setSyncState(state, label) {
   const dot  = document.getElementById('syncDot');
   const lbl  = document.getElementById('syncLabel');
-  const badge = document.getElementById('gasStatusBadge');
   if (!dot) return;
   dot.className = 'sync-dot' + (state ? ' ' + state : '');
   if (lbl) lbl.textContent = label || '';
-  if (badge) {
-    badge.textContent = GAS_URL ? label : 'Not configured';
-    badge.style.background = state==='ok' ? 'rgba(22,163,74,0.15)' : state==='error' ? 'rgba(220,38,38,0.1)' : state==='syncing' ? 'rgba(245,158,11,0.1)' : 'rgba(30,42,66,0.6)';
-    badge.style.color = state==='ok' ? 'var(--green-light)' : state==='error' ? 'var(--red-light)' : state==='syncing' ? 'var(--amber)' : 'var(--text-dim)';
-  }
 }
 
 function showLoading(show, msg) {
@@ -1259,17 +1225,17 @@ function showLoading(show, msg) {
 // ---- Save (local + GAS background sync) ----
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  if (GAS_URL) syncToGAS();
+  syncToGAS();
 }
 
 async function syncToGAS() {
-  if (!GAS_URL || syncPending) return;
+  if (syncPending) return;
   syncPending = true;
   setSyncState('syncing', 'Saving…');
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      mode: 'no-cors',           // avoids CORS preflight; data still reaches GAS
+      mode: 'no-cors',
       body: JSON.stringify(data),
     });
     setSyncState('ok', 'Saved ✓');
@@ -1282,10 +1248,9 @@ async function syncToGAS() {
 
 // ---- Load from GAS ----
 async function loadFromGAS() {
-  if (!GAS_URL) return false;
   try {
     showLoading(true, 'Loading from Google Sheets…');
-    const res = await fetch(GAS_URL + (GAS_URL.includes('?') ? '&' : '?') + 'nocache=' + Date.now());
+    const res = await fetch(GAS_URL + '?nocache=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const remote = await res.json();
     if (remote && typeof remote === 'object' && !remote.error) {
@@ -1295,7 +1260,7 @@ async function loadFromGAS() {
       return true;
     }
   } catch(e) {
-    setSyncState('error', 'Sync failed — using local data');
+    setSyncState('error', 'Using local data');
   } finally {
     showLoading(false);
   }
@@ -1304,37 +1269,10 @@ async function loadFromGAS() {
 
 // ---- Manual sync button ----
 async function manualSync() {
-  if (!GAS_URL) { showToast('⚠ No Google Sheets URL configured'); return; }
+  setSyncState('syncing', 'Syncing…');
   const ok = await loadFromGAS();
   if (ok) { renderAll(); showToast('✓ Synced from Google Sheets'); }
-  else showToast('⚠ Sync failed — check URL or network');
-}
-
-// ---- GAS URL management ----
-function setSetupVisible(show) {
-  const el = document.getElementById('gasSetupInstructions');
-  if (el) el.style.display = show ? 'block' : 'none';
-}
-
-function saveGasUrl() {
-  const url = document.getElementById('gasUrlInput').value.trim();
-  if (!url || !url.startsWith('https://script.google.com')) {
-    showToast('⚠ Enter a valid Apps Script URL'); return;
-  }
-  GAS_URL = url;
-  localStorage.setItem(GAS_URL_KEY, GAS_URL);
-  setSetupVisible(false);
-  showToast('✓ Connected — syncing now…');
-  manualSync().then(() => renderAll());
-}
-
-function disconnectGas() {
-  GAS_URL = '';
-  localStorage.removeItem(GAS_URL_KEY);
-  document.getElementById('gasUrlInput').value = '';
-  setSyncState('', 'Not connected');
-  setSetupVisible(true);
-  showToast('Disconnected from Google Sheets');
+  else showToast('⚠ Sync failed — using local data');
 }
 
 let expenseMode = 'general'; // 'general' | 'retreat'
@@ -1359,7 +1297,7 @@ function setExpenseMode(mode) {
   }
 }
 const MEMBERS = ['Umair','Farhan','Zeeshan','Haider'];
-const MEMBER_CONTRIB = { Umair:3000, Farhan:3000, Zeeshan:3000, Haider:5000 };
+const MEMBER_CONTRIB = { Umair:3000, Farhan:3000, Zeeshan:3000, Haider:6000 };
 const MEMBER_COLORS = {
   Umair: '#2563eb', Farhan: '#dc2626', Zeeshan: '#16a34a',
   Haider: '#7c3aed'
@@ -2135,17 +2073,9 @@ async function init() {
   });
   document.getElementById('contrib_amount').value = MEMBER_CONTRIB['Umair'];
 
-  // Pre-fill GAS URL if saved
-  if (GAS_URL) {
-    document.getElementById('gasUrlInput').value = GAS_URL;
-    setSetupVisible(false);
-    setSyncState('syncing', 'Loading…');
-    await loadFromGAS();
-  } else {
-    setSetupVisible(true);
-    setSyncState('', 'Not connected');
-    showLoading(false);
-  }
+  // Always load from Google Sheets on startup
+  setSyncState('syncing', 'Loading…');
+  await loadFromGAS();
 
   // Load opening balance
   if (data.openingBalance) document.getElementById('openingBalanceInput').value = data.openingBalance;
