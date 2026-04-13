@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Peera Club — Tajorii</title>
+<title>Peera Club — Khazana</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -593,6 +593,51 @@ select option { background: var(--card); }
   font-size: 0.94rem;
 }
 
+/* ===== SYNC / LOADING ===== */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  background: rgba(7,9,15,0.85);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1rem;
+  backdrop-filter: blur(4px);
+}
+.loading-overlay.hidden { display: none; }
+
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-msg {
+  font-size: 0.88rem; color: var(--text-muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+
+.sync-indicator {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.72rem; color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  cursor: pointer; padding: 4px 10px;
+  border-radius: 20px; border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.sync-indicator:hover { border-color: var(--blue-dim); color: var(--blue-light); }
+.sync-indicator .sync-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-dim); flex-shrink: 0;
+  transition: background 0.3s;
+}
+.sync-indicator .sync-dot.ok { background: var(--green-light); box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+.sync-indicator .sync-dot.syncing { background: var(--amber); animation: pulse 1s infinite; }
+.sync-indicator .sync-dot.error { background: var(--red-light); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+@media(max-width:768px) { .sync-indicator span.sync-label { display:none; } }
+
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
   .header { padding: 0 1rem; height: 56px; }
@@ -655,15 +700,25 @@ select option { background: var(--card); }
 </head>
 <body>
 
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-msg" id="loadingMsg">Loading from Google Sheets…</div>
+</div>
+
 <div class="header">
   <div class="logo">
     <div class="logo-icon">♠</div>
     <div>
       <div class="logo-text">PEERA CLUB</div>
-      <div class="logo-sub">Tajorii — Treasury</div>
+      <div class="logo-sub">Khazana — Treasury</div>
     </div>
   </div>
   <div class="header-right">
+    <div class="sync-indicator" id="syncIndicator" onclick="manualSync()" title="Click to sync now">
+      <div class="sync-dot" id="syncDot"></div>
+      <span class="sync-label" id="syncLabel">Not connected</span>
+    </div>
     <div class="month-badge" id="currentMonthBadge">—</div>
   </div>
 </div>
@@ -735,20 +790,51 @@ select option { background: var(--card); }
     <div class="section-spacer"></div>
 
     <div class="section-title">Settings</div>
-    <div class="card" style="max-width:480px">
-      <div class="card-header">
-        <span class="card-title">Opening Balance</span>
-        <span style="font-size:0.72rem;color:var(--text-dim)">Pool funds before April tracking began</span>
-      </div>
-      <div style="padding:1.25rem;display:flex;gap:0.75rem;align-items:flex-end">
-        <div class="form-group" style="flex:1">
-          <label>Amount (Rs.)</label>
-          <input type="number" id="openingBalanceInput" placeholder="0" style="font-family:'DM Mono'">
+
+    <div class="grid-2">
+      <!-- Google Sheets Sync -->
+      <div class="card" style="border-color:var(--blue-dim)">
+        <div class="card-header" style="background:rgba(37,99,235,0.06)">
+          <span class="card-title" style="color:var(--blue-light)">🔗 Google Sheets Sync</span>
+          <span id="gasStatusBadge" style="font-size:0.7rem;padding:2px 9px;border-radius:4px;background:rgba(30,42,66,0.6);color:var(--text-dim)">Not configured</span>
         </div>
-        <button class="btn btn-gold" onclick="saveOpeningBalance()" style="margin-bottom:0;white-space:nowrap">Save</button>
+        <div style="padding:1.25rem">
+          <div class="form-group" style="margin-bottom:1rem">
+            <label>Apps Script Web App URL</label>
+            <input type="url" id="gasUrlInput" placeholder="https://script.google.com/macros/s/…/exec" style="font-size:0.78rem">
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+            <button class="btn btn-gold" onclick="saveGasUrl()">Connect</button>
+            <button class="btn btn-outline" onclick="manualSync()" style="font-size:0.82rem">↻ Sync Now</button>
+            <button class="btn btn-outline" onclick="disconnectGas()" style="font-size:0.82rem;color:var(--red-light);border-color:var(--red-dim)">Disconnect</button>
+          </div>
+          <div style="margin-top:1rem;padding:0.85rem;background:var(--surface);border-radius:8px;font-size:0.78rem;color:var(--text-muted);line-height:1.7">
+            <div style="color:var(--blue-light);font-weight:600;margin-bottom:0.4rem">How to set up:</div>
+            <div>1. Go to <strong style="color:var(--text)">script.google.com</strong> → New Project</div>
+            <div>2. Paste the <strong style="color:var(--text)">PeeraClub_GAS.gs</strong> code</div>
+            <div>3. Deploy → Web App → <strong style="color:var(--text)">Anyone</strong> can access</div>
+            <div>4. Copy the URL and paste above → Connect</div>
+            <div style="margin-top:0.5rem;color:var(--text-dim)">All members share one Google Sheet. Data syncs automatically on every save.</div>
+          </div>
+        </div>
       </div>
-      <div style="padding:0 1.25rem 1rem;font-size:0.78rem;color:var(--text-muted)">
-        Any funds already in the pool before you started tracking go here.
+
+      <!-- Opening Balance -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Opening Balance</span>
+          <span style="font-size:0.72rem;color:var(--text-dim)">Pool funds before April tracking</span>
+        </div>
+        <div style="padding:1.25rem;display:flex;gap:0.75rem;align-items:flex-end">
+          <div class="form-group" style="flex:1">
+            <label>Amount (Rs.)</label>
+            <input type="number" id="openingBalanceInput" placeholder="0" style="font-family:'DM Mono'">
+          </div>
+          <button class="btn btn-gold" onclick="saveOpeningBalance()" style="white-space:nowrap">Save</button>
+        </div>
+        <div style="padding:0 1.25rem 1rem;font-size:0.78rem;color:var(--text-muted)">
+          Funds already in the pool before tracking started. Added to pool balance.
+        </div>
       </div>
     </div>
   </div>
@@ -1132,20 +1218,116 @@ select option { background: var(--card); }
 <script>
 // ===================== DATA STORE =====================
 const STORAGE_KEY = 'peeraclub_v1';
+const GAS_URL_KEY  = 'peeraclub_gas_url';
 
 const DEFAULT_DATA = {
-  openingBalance: 0, // Rs. carried over before tracking started
-  contributions: [], // {id, member, month, amount, note, date}
-  expenses: [],      // {id, desc, amount, date, category, retreat, paidby, note}
-  receivables: [],   // {id, member, desc, amount, date, category, retreat, note, settled}
-  rungResults: [],   // {id, date, name, winners:[],losers:[]}
-  retreats: [],      // {id, name, date, budget, dest, status}
+  openingBalance: 0,
+  contributions: [],
+  expenses: [],
+  receivables: [],
+  rungResults: [],
+  retreats: [],
 };
 
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
+let GAS_URL = localStorage.getItem(GAS_URL_KEY) || '';
+let syncPending = false;
 
+// ---- Sync UI helpers ----
+function setSyncState(state, label) {
+  const dot  = document.getElementById('syncDot');
+  const lbl  = document.getElementById('syncLabel');
+  const badge = document.getElementById('gasStatusBadge');
+  if (!dot) return;
+  dot.className = 'sync-dot' + (state ? ' ' + state : '');
+  if (lbl) lbl.textContent = label || '';
+  if (badge) {
+    badge.textContent = GAS_URL ? label : 'Not configured';
+    badge.style.background = state==='ok' ? 'rgba(22,163,74,0.15)' : state==='error' ? 'rgba(220,38,38,0.1)' : state==='syncing' ? 'rgba(245,158,11,0.1)' : 'rgba(30,42,66,0.6)';
+    badge.style.color = state==='ok' ? 'var(--green-light)' : state==='error' ? 'var(--red-light)' : state==='syncing' ? 'var(--amber)' : 'var(--text-dim)';
+  }
+}
+
+function showLoading(show, msg) {
+  const el = document.getElementById('loadingOverlay');
+  const ml = document.getElementById('loadingMsg');
+  if (!el) return;
+  el.classList.toggle('hidden', !show);
+  if (ml && msg) ml.textContent = msg;
+}
+
+// ---- Save (local + GAS background sync) ----
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  if (GAS_URL) syncToGAS();
+}
+
+async function syncToGAS() {
+  if (!GAS_URL || syncPending) return;
+  syncPending = true;
+  setSyncState('syncing', 'Saving…');
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',           // avoids CORS preflight; data still reaches GAS
+      body: JSON.stringify(data),
+    });
+    setSyncState('ok', 'Saved ✓');
+  } catch(e) {
+    setSyncState('error', 'Save failed');
+  } finally {
+    syncPending = false;
+  }
+}
+
+// ---- Load from GAS ----
+async function loadFromGAS() {
+  if (!GAS_URL) return false;
+  try {
+    showLoading(true, 'Loading from Google Sheets…');
+    const res = await fetch(GAS_URL + (GAS_URL.includes('?') ? '&' : '?') + 'nocache=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const remote = await res.json();
+    if (remote && typeof remote === 'object' && !remote.error) {
+      data = { ...JSON.parse(JSON.stringify(DEFAULT_DATA)), ...remote };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setSyncState('ok', 'Synced ✓');
+      return true;
+    }
+  } catch(e) {
+    setSyncState('error', 'Sync failed — using local data');
+  } finally {
+    showLoading(false);
+  }
+  return false;
+}
+
+// ---- Manual sync button ----
+async function manualSync() {
+  if (!GAS_URL) { showToast('⚠ No Google Sheets URL configured'); return; }
+  const ok = await loadFromGAS();
+  if (ok) { renderAll(); showToast('✓ Synced from Google Sheets'); }
+  else showToast('⚠ Sync failed — check URL or network');
+}
+
+// ---- GAS URL management ----
+function saveGasUrl() {
+  const url = document.getElementById('gasUrlInput').value.trim();
+  if (!url || !url.startsWith('https://script.google.com')) {
+    showToast('⚠ Enter a valid Apps Script URL'); return;
+  }
+  GAS_URL = url;
+  localStorage.setItem(GAS_URL_KEY, GAS_URL);
+  showToast('✓ Connected — syncing now…');
+  manualSync().then(() => renderAll());
+}
+
+function disconnectGas() {
+  GAS_URL = '';
+  localStorage.removeItem(GAS_URL_KEY);
+  document.getElementById('gasUrlInput').value = '';
+  setSyncState('', 'Not connected');
+  showToast('Disconnected from Google Sheets');
 }
 
 let expenseMode = 'general'; // 'general' | 'retreat'
@@ -1159,12 +1341,12 @@ function setExpenseMode(mode) {
   if(mode === 'retreat') {
     retreatRow.style.display = 'block';
     hint.textContent = 'Expense will be tagged to selected retreat';
-    btnR.style.background = 'var(--gold)'; btnR.style.color = '#1a1410';
+    btnR.style.background = 'var(--blue)'; btnR.style.color = '#fff';
     btnG.style.background = 'transparent'; btnG.style.color = 'var(--text-muted)';
   } else {
     retreatRow.style.display = 'none';
     hint.textContent = 'Logging as general pool expense';
-    btnG.style.background = 'var(--gold)'; btnG.style.color = '#1a1410';
+    btnG.style.background = 'var(--blue)'; btnG.style.color = '#fff';
     btnR.style.background = 'transparent'; btnR.style.color = 'var(--text-muted)';
     document.getElementById('exp_retreat').value = '';
   }
@@ -1926,7 +2108,9 @@ function focusOpeningBalance() {
     if(inp) { inp.focus(); inp.select(); inp.scrollIntoView({ behavior:'smooth', block:'center' }); }
   }, 100);
 }
-function init() {
+async function init() {
+  showLoading(true, 'Starting up…');
+
   // Set current month badge
   const now = new Date();
   document.getElementById('currentMonthBadge').textContent =
@@ -1944,8 +2128,18 @@ function init() {
   });
   document.getElementById('contrib_amount').value = MEMBER_CONTRIB['Umair'];
 
+  // Pre-fill GAS URL if saved
+  if (GAS_URL) {
+    document.getElementById('gasUrlInput').value = GAS_URL;
+    setSyncState('syncing', 'Loading…');
+    await loadFromGAS();
+  } else {
+    setSyncState('', 'Not connected');
+    showLoading(false);
+  }
+
   // Load opening balance
-  if(data.openingBalance) document.getElementById('openingBalanceInput').value = data.openingBalance;
+  if (data.openingBalance) document.getElementById('openingBalanceInput').value = data.openingBalance;
 
   updateRetreatDropdowns();
   renderAll();
