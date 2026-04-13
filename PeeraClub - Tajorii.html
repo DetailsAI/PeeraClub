@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peera Club — Tajorii</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090f;
+  --surface: #0c0f18;
+  --card: #111827;
+  --border: #1e2a42;
+  --blue: #2563eb;
+  --blue-light: #60a5fa;
+  --blue-dim: #1e3a6e;
+  --blue-glow: rgba(37,99,235,0.18);
+  --red: #dc2626;
+  --red-light: #f87171;
+  --red-dim: #7f1d1d;
+  --green: #16a34a;
+  --green-light: #4ade80;
+  --text: #e2e8f8;
+  --text-muted: #94a3b8;
+  --text-dim: #6b7fa0;
+  --amber: #f59e0b;
+  --amber-light: #fcd34d;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle grid pattern background */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.5;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #0c0f18 0%, #07090f 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 20px rgba(0,0,0,0.5);
+}
+
+.logo {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--blue), #1d4ed8);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 16px rgba(37,99,235,0.4);
+}
+
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--blue-light);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.logo-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.header-right {
+  display: flex; align-items: center; gap: 1rem;
+}
+
+.month-badge {
+  background: var(--card);
+  border: 1px solid var(--blue-dim);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  color: var(--blue-light);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  overflow-x: auto;
+  position: relative; z-index: 10;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+
+.nav-btn {
+  background: none; border: none;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 13px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active {
+  color: var(--blue-light);
+  border-bottom-color: var(--blue);
+}
+
+/* Main */
+.main { padding: 1.5rem 2rem; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+
+/* KPI row */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  border-radius: 14px;
+  padding: 1.25rem 1.4rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid transparent;
+}
+
+.kpi-card:hover { transform: translateY(-2px); }
+
+.kpi-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 0.55rem;
+}
+
+.kpi-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem;
+  color: #fff;
+  line-height: 1;
+}
+
+.kpi-value.red { color: #fca5a5; }
+.kpi-value.green { color: #86efac; }
+
+.kpi-sub {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 0.45rem;
+}
+
+/* Section title */
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+
+.section-title::after {
+  content: ''; flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Grid 2 col */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+/* Card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,255,255,0.01);
+}
+
+.card-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.card-body { padding: 0; }
+
+/* Member row */
+.member-row {
+  display: flex; align-items: center;
+  padding: 0.8rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  gap: 0.85rem;
+  transition: background 0.15s;
+}
+
+.member-row:last-child { border-bottom: none; }
+.member-row:hover { background: rgba(37,99,235,0.04); }
+
+.member-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.member-name {
+  font-weight: 500;
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.member-role {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+
+.amount-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.amount-tag.gold { background: rgba(37,99,235,0.15); color: var(--blue-light); }
+.amount-tag.green { background: rgba(22,163,74,0.15); color: var(--green-light); }
+.amount-tag.red { background: rgba(220,38,38,0.15); color: var(--red-light); }
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+.status-dot.paid { background: var(--green-light); box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+.status-dot.unpaid { background: var(--text-dim); }
+.status-dot.partial { background: var(--amber); }
+
+/* Toggle paid button */
+.toggle-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px;
+  font-size: 0.75rem; color: var(--text-muted);
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Outfit', sans-serif;
+  white-space: nowrap;
+}
+
+.toggle-btn:hover { border-color: var(--blue); color: var(--blue-light); }
+.toggle-btn.paid-btn { border-color: var(--green); color: var(--green-light); }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--text-dim); font-weight: 600;
+  padding: 0.7rem 1.25rem; text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.data-table td {
+  padding: 0.8rem 1.25rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid rgba(30,42,66,0.7);
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(37,99,235,0.04); }
+
+/* Form */
+.form-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--blue-light);
+  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-group.full { grid-column: 1 / -1; }
+
+label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+input, select, textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.92rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--blue-dim);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+select option { background: var(--card); }
+
+.btn {
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  letter-spacing: 0.05em;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--blue), #1d4ed8);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(37,99,235,0.3);
+}
+
+.btn-gold:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(37,99,235,0.45); }
+
+.btn-outline {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.btn-outline:hover { border-color: var(--blue); color: var(--blue-light); }
+
+.btn-danger {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover { color: var(--red-light); background: rgba(220,38,38,0.1); }
+
+/* Category chip */
+.category-chip {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cat-travel { background: rgba(37,99,235,0.2); color: var(--blue-light); }
+.cat-food { background: rgba(245,158,11,0.15); color: var(--amber-light); }
+.cat-entertainment { background: rgba(220,38,38,0.15); color: var(--red-light); }
+.cat-logistics { background: rgba(22,163,74,0.15); color: var(--green-light); }
+.cat-other { background: rgba(45,55,80,0.4); color: var(--text-muted); }
+
+/* Rung tournament */
+.rung-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.team-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.team-card.winner { border-color: var(--blue-dim); box-shadow: inset 0 0 20px rgba(37,99,235,0.05); }
+.team-card.loser { border-color: rgba(220,38,38,0.35); box-shadow: inset 0 0 20px rgba(220,38,38,0.05); }
+
+.team-label {
+  font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.12em; margin-bottom: 0.7rem;
+}
+
+.team-label.winner { color: var(--blue-light); }
+.team-label.loser { color: var(--red-light); }
+
+/* Tab panels */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--blue-dim);
+  border-radius: 10px;
+  padding: 0.8rem 1.4rem;
+  font-size: 0.88rem;
+  color: var(--blue-light);
+  z-index: 9998;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(37,99,235,0.15);
+  max-width: calc(100vw - 3rem);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Receivable badge */
+.receivable-row {
+  display: flex; align-items: center; gap: 0.85rem;
+  padding: 0.8rem 1.25rem;
+  border-bottom: 1px solid rgba(30,42,66,0.7);
+  font-size: 0.88rem;
+  flex-wrap: wrap;
+}
+
+.receivable-row:last-child { border-bottom: none; }
+.settled-badge {
+  font-size: 0.7rem; padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.settled-badge.yes { background: rgba(22,163,74,0.2); color: var(--green-light); }
+.settled-badge.no { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+}
+
+.empty-icon { font-size: 2.2rem; margin-bottom: 0.7rem; opacity: 0.45; }
+
+/* Month selector */
+.month-selector {
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.month-pill {
+  padding: 4px 13px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: none;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Outfit', sans-serif;
+}
+
+.month-pill:hover { border-color: var(--blue-dim); color: var(--text); }
+.month-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 600; box-shadow: 0 0 12px rgba(37,99,235,0.35); }
+
+/* Retreats card */
+.retreat-card {
+  background: linear-gradient(135deg, #111827, #07090f);
+  border: 1px solid var(--blue-dim);
+  border-radius: 12px;
+  padding: 1.4rem;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0 30px rgba(37,99,235,0.05);
+}
+
+.retreat-card::before {
+  content: '✦';
+  position: absolute; top: -10px; right: 20px;
+  font-size: 80px;
+  color: rgba(37,99,235,0.05);
+  font-family: serif;
+}
+
+.retreat-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  color: var(--blue-light);
+  margin-bottom: 0.2rem;
+}
+
+.retreat-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1.1rem;
+}
+
+.retreat-budget-bar {
+  background: var(--surface);
+  border-radius: 4px;
+  height: 6px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.retreat-budget-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), #60a5fa);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* Footer */
+.section-spacer { height: 1.75rem; }
+
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.86rem;
+  border-top: 1px solid var(--border);
+}
+
+.summary-row.total {
+  font-weight: 600;
+  background: rgba(37,99,235,0.06);
+  font-size: 0.94rem;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .header { padding: 0 1rem; height: 56px; }
+  .logo-text { font-size: 1rem; }
+  .logo-sub { font-size: 0.65rem; }
+  .month-badge { display: none; }
+
+  .nav { padding: 0 0.5rem; }
+  .nav-btn { font-size: 0.72rem; padding: 11px 12px; letter-spacing: 0.02em; }
+
+  .main { padding: 1rem; }
+
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+  .kpi-card { padding: 1rem 1.1rem; border-radius: 12px; }
+  .kpi-value { font-size: 1.25rem; }
+  .kpi-label { font-size: 0.65rem; }
+  .kpi-sub { font-size: 0.68rem; }
+
+  .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr; }
+
+  .section-title { font-size: 0.95rem; }
+
+  .member-row { padding: 0.7rem 1rem; gap: 0.7rem; }
+  .member-name { font-size: 0.85rem; }
+  .amount-tag { font-size: 0.72rem; padding: 2px 7px; }
+
+  .data-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .data-table th, .data-table td { padding: 0.6rem 0.85rem; font-size: 0.78rem; }
+
+  .rung-grid { grid-template-columns: 1fr; }
+
+  .retreat-name { font-size: 1.15rem; }
+  .retreat-card { padding: 1.1rem; }
+
+  .form-section { padding: 1.1rem; }
+
+  .toast { bottom: 1rem; right: 1rem; left: 1rem; text-align: center; }
+
+  .receivable-row { padding: 0.7rem 1rem; font-size: 0.82rem; }
+
+  .card-header { padding: 0.75rem 1rem; }
+  .card-title { font-size: 0.7rem; }
+
+  .btn { font-size: 0.82rem; padding: 0.55rem 1.2rem; }
+
+  .month-selector { gap: 0.4rem; }
+  .month-pill { font-size: 0.72rem; padding: 3px 10px; }
+}
+
+@media (max-width: 480px) {
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .kpi-value { font-size: 1.1rem; }
+  .kpi-label { font-size: 0.6rem; letter-spacing: 0.06em; }
+  .kpi-sub { display: none; }
+  .logo-sub { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">♠</div>
+    <div>
+      <div class="logo-text">PEERA CLUB</div>
+      <div class="logo-sub">Tajorii — Treasury</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="month-badge" id="currentMonthBadge">—</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="switchTab('contributions')">Contributions</button>
+  <button class="nav-btn" onclick="switchTab('expenses')">Expenses</button>
+  <button class="nav-btn" onclick="switchTab('receivables')">Receivables</button>
+  <button class="nav-btn" onclick="switchTab('rung')">Rung Penalties</button>
+  <button class="nav-btn" onclick="switchTab('retreats')">Retreats</button>
+  <button class="nav-btn" onclick="switchTab('analytics')">Analytics</button>
+</nav>
+
+<div class="main">
+
+  <!-- DASHBOARD TAB -->
+  <div class="tab-panel active" id="tab-dashboard">
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <!-- Receivables + Payables row -->
+    <div class="grid-2" style="margin-bottom:1.5rem">
+      <div>
+        <div class="section-title" style="color:var(--amber)">Receivables <span style="font-size:0.72rem;color:var(--text-dim);font-family:'Outfit'">— Pool is owed by members</span></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Unpaid Contributions</span>
+            <span id="dashRecvTotal" style="font-family:'DM Mono';font-size:0.8rem;color:var(--amber)"></span>
+          </div>
+          <div id="dashRecvList"></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title" style="color:#6aabee">Payables <span style="font-size:0.72rem;color:var(--text-dim);font-family:'Outfit'">— Pool owes members</span></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Member Reimbursements</span>
+            <span id="dashPayTotal" style="font-family:'DM Mono';font-size:0.8rem;color:#6aabee"></span>
+          </div>
+          <div id="dashPayList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-title">This Month's Contributions</div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="contribMonthLabel">Contributions</span>
+            <span style="font-size:0.75rem;color:var(--text-dim)" id="contribProgress">—</span>
+          </div>
+          <div class="card-body" id="dashMemberStatus"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Recent Expenses</div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Pool Expenses</span>
+            <span style="font-size:0.75rem;color:var(--text-dim)" id="recentExpTotal">—</span>
+          </div>
+          <div class="card-body" id="recentExpList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-spacer"></div>
+
+    <div class="section-title">Settings</div>
+    <div class="card" style="max-width:480px">
+      <div class="card-header">
+        <span class="card-title">Opening Balance</span>
+        <span style="font-size:0.72rem;color:var(--text-dim)">Pool funds before April tracking began</span>
+      </div>
+      <div style="padding:1.25rem;display:flex;gap:0.75rem;align-items:flex-end">
+        <div class="form-group" style="flex:1">
+          <label>Amount (Rs.)</label>
+          <input type="number" id="openingBalanceInput" placeholder="0" style="font-family:'DM Mono'">
+        </div>
+        <button class="btn btn-gold" onclick="saveOpeningBalance()" style="margin-bottom:0;white-space:nowrap">Save</button>
+      </div>
+      <div style="padding:0 1.25rem 1rem;font-size:0.78rem;color:var(--text-muted)">
+        Any funds already in the pool before you started tracking go here.
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRIBUTIONS TAB -->
+  <div class="tab-panel" id="tab-contributions">
+    <div class="section-title">Monthly Contributions</div>
+
+    <div class="month-selector" id="monthSelector"></div>
+
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="contribCardTitle">Member Status</span>
+            <span id="contribMonthTotal" style="font-family:'DM Mono';font-size:0.8rem;color:var(--gold)"></span>
+          </div>
+          <div class="card-body" id="contribMemberList"></div>
+          <div class="summary-row total">
+            <span>Pool Total (All Time)</span>
+            <span id="totalPoolDisplay" style="font-family:'DM Mono';color:var(--gold-light)"></span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="form-section">
+          <div class="form-title">＋ Add Contribution</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Member</label>
+              <select id="contrib_member">
+                <option>Umair</option>
+                <option>Farhan</option>
+                <option>Zeeshan</option>
+                <option>Haider</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Month</label>
+              <input type="month" id="contrib_month">
+            </div>
+            <div class="form-group">
+              <label>Amount (Rs.)</label>
+              <input type="number" id="contrib_amount" placeholder="3000">
+            </div>
+            <div class="form-group">
+              <label>Note</label>
+              <input type="text" id="contrib_note" placeholder="Optional note">
+            </div>
+          </div>
+          <div style="margin-top:1rem">
+            <button class="btn btn-gold" onclick="addContribution()">Record Contribution</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Contribution Rules</span>
+          </div>
+          <div style="padding:1.25rem;font-size:0.82rem;color:var(--text-muted);line-height:1.8">
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">
+              <span>Umair, Farhan, Zeeshan</span>
+              <span style="color:var(--gold);font-family:'DM Mono'">Rs. 3,000 / mo</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">
+              <span>Haider</span>
+              <span style="color:var(--gold);font-family:'DM Mono'">Rs. 5,000 / mo</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">
+              <span>Expected Monthly Pool</span>
+              <span style="color:var(--gold-light);font-family:'DM Mono'">Rs. 14,000</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0">
+              <span>Rung Loser Penalty (each)</span>
+              <span style="color:var(--amber);font-family:'DM Mono'">Rs. 2,500</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSES TAB -->
+  <div class="tab-panel" id="tab-expenses">
+    <div class="section-title">Pool Expenses</div>
+
+    <div class="form-section">
+      <div class="form-title">＋ Log Pool Expense</div>
+
+      <!-- Retreat toggle -->
+      <div style="display:flex;gap:0;margin-bottom:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content">
+        <button id="exp_toggle_general" class="exp-toggle active-toggle" onclick="setExpenseMode('general')"
+          style="padding:8px 20px;font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;background:var(--blue);color:#fff">
+          📦 General Expense
+        </button>
+        <button id="exp_toggle_retreat" class="exp-toggle" onclick="setExpenseMode('retreat')"
+          style="padding:8px 20px;font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;background:transparent;color:var(--text-muted)">
+          🏕️ Tag to Retreat
+        </button>
+      </div>
+
+      <!-- Retreat selector (hidden by default) -->
+      <div id="exp_retreat_row" style="display:none;margin-bottom:1rem;padding:0.85rem 1rem;background:rgba(37,99,235,0.06);border:1px solid var(--blue-dim);border-radius:8px">
+        <div class="form-group">
+          <label>Select Retreat</label>
+          <select id="exp_retreat" style="max-width:360px">
+            <option value="">— Choose a retreat —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="exp_desc" placeholder="e.g. Dinner at Savera">
+        </div>
+        <div class="form-group">
+          <label>Amount (Rs.)</label>
+          <input type="number" id="exp_amount" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="exp_date">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="exp_category">
+            <option value="food">Food</option>
+            <option value="travel">Travel</option>
+            <option value="logistics">Logistics</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Paid By</label>
+          <select id="exp_paidby">
+            <option value="pool">Pool (direct)</option>
+            <option value="Umair">Umair</option>
+            <option value="Farhan">Farhan</option>
+            <option value="Zeeshan">Zeeshan</option>
+            <option value="Haider">Haider</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <input type="text" id="exp_note" placeholder="Optional detail">
+        </div>
+      </div>
+      <div style="margin-top:1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <button class="btn btn-gold" onclick="addExpense()">Log Expense</button>
+        <span id="exp_mode_hint" style="font-size:0.78rem;color:var(--text-muted)">Logging as general pool expense</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Expense Ledger</span>
+        <span id="expTotalLabel" style="font-family:'DM Mono';font-size:0.8rem;color:var(--crimson)"></span>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Retreat</th>
+            <th>Paid By</th>
+            <th style="text-align:right">Amount</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="expenseTableBody"></tbody>
+      </table>
+      <div id="expenseEmpty" class="empty-state" style="display:none">
+        <div class="empty-icon">💸</div>
+        <div>No expenses logged yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIVABLES TAB -->
+  <div class="tab-panel" id="tab-receivables">
+    <div class="section-title">Member Receivables</div>
+
+    <div class="form-section">
+      <div class="form-title">＋ Log Personal Expense (Receivable)</div>
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Member</label>
+          <select id="recv_member">
+            <option>Umair</option>
+            <option>Farhan</option>
+            <option>Zeeshan</option>
+            <option>Haider</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="recv_desc" placeholder="e.g. Fuel for Nathia Gali trip">
+        </div>
+        <div class="form-group">
+          <label>Amount (Rs.)</label>
+          <input type="number" id="recv_amount" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="recv_date">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="recv_category">
+            <option value="food">Food</option>
+            <option value="travel">Travel</option>
+            <option value="logistics">Logistics</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Retreat / Event</label>
+          <select id="recv_retreat">
+            <option value="">— General —</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Note</label>
+          <input type="text" id="recv_note" placeholder="Optional detail">
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <button class="btn btn-gold" onclick="addReceivable()">Add Receivable</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Receivables Ledger</span>
+        <span id="recvTotalLabel" style="font-family:'DM Mono';font-size:0.8rem;color:var(--amber)"></span>
+      </div>
+      <div id="receivablesList"></div>
+      <div id="receivablesEmpty" class="empty-state" style="display:none">
+        <div class="empty-icon">🧾</div>
+        <div>No receivables logged</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNG PENALTIES TAB -->
+  <div class="tab-panel" id="tab-rung">
+    <div class="section-title">Maidaan-e-Rung — Penalties</div>
+
+    <div class="form-section">
+      <div class="form-title">🃏 Log Tournament Result</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tournament Date</label>
+          <input type="date" id="rung_date">
+        </div>
+        <div class="form-group">
+          <label>Tournament Name / Note</label>
+          <input type="text" id="rung_name" placeholder="e.g. Eid Special, Q1 Meetup">
+        </div>
+      </div>
+
+      <div class="rung-grid" style="margin-top:1.25rem">
+        <div class="team-card winner">
+          <div class="team-label winner">🏆 Winning Team</div>
+          <div class="form-group" style="margin-bottom:0.75rem">
+            <label>Player 1</label>
+            <select id="win1">
+              <option value="">Select</option>
+              <option>Umair</option><option>Farhan</option><option>Zeeshan</option>
+              <option>Haider</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Player 2</label>
+            <select id="win2">
+              <option value="">Select</option>
+              <option>Umair</option><option>Farhan</option><option>Zeeshan</option>
+              <option>Haider</option>
+            </select>
+          </div>
+        </div>
+        <div class="team-card loser">
+          <div class="team-label loser">💀 Losing Team</div>
+          <div class="form-group" style="margin-bottom:0.75rem">
+            <label>Player 1</label>
+            <select id="lose1">
+              <option value="">Select</option>
+              <option>Umair</option><option>Farhan</option><option>Zeeshan</option>
+              <option>Haider</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Player 2</label>
+            <select id="lose2">
+              <option value="">Select</option>
+              <option>Umair</option><option>Farhan</option><option>Zeeshan</option>
+              <option>Haider</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <button class="btn btn-gold" onclick="addRungResult()">Record Result</button>
+        <span style="font-size:0.78rem;color:var(--text-muted)">Each loser pays Rs. 2,500 into the pool</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Penalty History</span>
+        <span id="rungTotalLabel" style="font-family:'DM Mono';font-size:0.8rem;color:var(--gold)"></span>
+      </div>
+      <div id="rungList"></div>
+      <div id="rungEmpty" class="empty-state" style="display:none">
+        <div class="empty-icon">🃏</div>
+        <div>No tournaments recorded</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETREATS TAB -->
+  <div class="tab-panel" id="tab-retreats">
+    <div class="section-title">Quarterly Retreats</div>
+
+    <div class="form-section">
+      <div class="form-title">＋ Plan a Retreat</div>
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Retreat Name</label>
+          <input type="text" id="ret_name" placeholder="e.g. Nathia Gali Q1 2025">
+        </div>
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="ret_start">
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" id="ret_end">
+        </div>
+        <div class="form-group">
+          <label>Destination</label>
+          <input type="text" id="ret_dest" placeholder="e.g. Nathia Gali">
+        </div>
+        <div class="form-group">
+          <label>Budget (Rs.)</label>
+          <input type="number" id="ret_budget" placeholder="50000">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="ret_status">
+            <option value="planned">Planned</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <button class="btn btn-gold" onclick="addRetreat()">Add Retreat</button>
+      </div>
+    </div>
+
+    <div id="retreatList"></div>
+    <div id="retreatEmpty" class="empty-state" style="display:none">
+      <div class="empty-icon">🏕️</div>
+      <div>No retreats planned yet</div>
+    </div>
+  </div>
+  <!-- ANALYTICS TAB -->
+  <div class="tab-panel" id="tab-analytics">
+    <div class="section-title">Expense Analytics</div>
+    <div id="analyticsContent"></div>
+  </div>
+
+</div>
+
+<script>
+// ===================== DATA STORE =====================
+const STORAGE_KEY = 'peeraclub_v1';
+
+const DEFAULT_DATA = {
+  openingBalance: 0, // Rs. carried over before tracking started
+  contributions: [], // {id, member, month, amount, note, date}
+  expenses: [],      // {id, desc, amount, date, category, retreat, paidby, note}
+  receivables: [],   // {id, member, desc, amount, date, category, retreat, note, settled}
+  rungResults: [],   // {id, date, name, winners:[],losers:[]}
+  retreats: [],      // {id, name, date, budget, dest, status}
+};
+
+let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let expenseMode = 'general'; // 'general' | 'retreat'
+
+function setExpenseMode(mode) {
+  expenseMode = mode;
+  const retreatRow = document.getElementById('exp_retreat_row');
+  const hint = document.getElementById('exp_mode_hint');
+  const btnG = document.getElementById('exp_toggle_general');
+  const btnR = document.getElementById('exp_toggle_retreat');
+  if(mode === 'retreat') {
+    retreatRow.style.display = 'block';
+    hint.textContent = 'Expense will be tagged to selected retreat';
+    btnR.style.background = 'var(--gold)'; btnR.style.color = '#1a1410';
+    btnG.style.background = 'transparent'; btnG.style.color = 'var(--text-muted)';
+  } else {
+    retreatRow.style.display = 'none';
+    hint.textContent = 'Logging as general pool expense';
+    btnG.style.background = 'var(--gold)'; btnG.style.color = '#1a1410';
+    btnR.style.background = 'transparent'; btnR.style.color = 'var(--text-muted)';
+    document.getElementById('exp_retreat').value = '';
+  }
+}
+const MEMBERS = ['Umair','Farhan','Zeeshan','Haider'];
+const MEMBER_CONTRIB = { Umair:3000, Farhan:3000, Zeeshan:3000, Haider:5000 };
+const MEMBER_COLORS = {
+  Umair: '#2563eb', Farhan: '#dc2626', Zeeshan: '#16a34a',
+  Haider: '#7c3aed'
+};
+
+function avatarStyle(member) {
+  const c = MEMBER_COLORS[member] || '#666';
+  return `background:${c}22;color:${c};border:1.5px solid ${c}44`;
+}
+
+// ===================== UTILS =====================
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function fmtMoney(n) { return 'Rs. ' + Number(n).toLocaleString('en-PK'); }
+function fmtDate(d) { if(!d) return '—'; return new Date(d+'T00:00:00').toLocaleDateString('en-PK',{day:'2-digit',month:'short',year:'numeric'}); }
+function currentMonth() { return new Date().toISOString().slice(0,7); }
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+function catClass(cat) {
+  const m = {travel:'cat-travel',food:'cat-food',entertainment:'cat-entertainment',logistics:'cat-logistics',other:'cat-other'};
+  return m[cat] || 'cat-other';
+}
+
+// ===================== NAV =====================
+let activeTab = 'dashboard';
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  renderAll();
+}
+
+// ===================== MONTH SELECTOR =====================
+let selectedMonth = currentMonth();
+
+function buildMonthSelector() {
+  const months = new Set(data.contributions.map(c => c.month));
+  months.add(currentMonth());
+  const sorted = [...months].sort().reverse();
+  const sel = document.getElementById('monthSelector');
+  sel.innerHTML = sorted.map(m => {
+    const label = new Date(m+'-01').toLocaleDateString('en-PK',{month:'short',year:'numeric'});
+    return `<button class="month-pill ${m===selectedMonth?'active':''}" onclick="selectMonth('${m}',this)">${label}</button>`;
+  }).join('');
+}
+
+function selectMonth(m, btn) {
+  selectedMonth = m;
+  document.querySelectorAll('.month-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderContributions();
+}
+
+// ===================== KPI =====================
+function totalContributions() { return data.contributions.reduce((s,c) => s+Number(c.amount),0); }
+function totalExpenses() { return data.expenses.reduce((s,e) => s+Number(e.amount),0); }
+function totalPayablesToMembers() { return data.receivables.filter(r=>!r.settled).reduce((s,r)=>s+Number(r.amount),0); }
+function totalReceivablesFromMembers() {
+  // Sum of expected contributions for all months that have at least one payment recorded, minus what's been paid
+  const months = [...new Set(data.contributions.map(c=>c.month))];
+  if(!months.length) {
+    // Just current month
+    const mon = currentMonth();
+    const paid = data.contributions.filter(c=>c.month===mon).reduce((s,c)=>s+Number(c.amount),0);
+    const expected = Object.values(MEMBER_CONTRIB).reduce((a,b)=>a+b,0);
+    return Math.max(0, expected - paid);
+  }
+  return months.reduce((total, mon) => {
+    const paid = data.contributions.filter(c=>c.month===mon && !c.note?.includes('Rung penalty')).reduce((s,c)=>s+Number(c.amount),0);
+    const expected = Object.values(MEMBER_CONTRIB).reduce((a,b)=>a+b,0);
+    return total + Math.max(0, expected - paid);
+  }, 0);
+}
+function rungPenaltiesTotal() {
+  return data.rungResults.reduce((s,r)=>s+(r.losers.length*2500),0);
+}
+function poolBalance() { return (data.openingBalance||0) + totalContributions() + rungPenaltiesTotal() - totalExpenses(); }
+
+function renderKPIs() {
+  const bal = poolBalance();
+  const recv = totalReceivablesFromMembers();
+  const pay = totalPayablesToMembers();
+  const exp = totalExpenses();
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi-card" style="background:#0d2a1a;border-color:${bal>=0?'#16a34a':'#dc2626'}">
+      <div class="kpi-label">Pool Balance Today</div>
+      <div class="kpi-value ${bal<0?'red':'green'}">${fmtMoney(bal)}</div>
+      <div class="kpi-sub">Opening + contributions − expenses</div>
+    </div>
+    <div class="kpi-card" style="background:#2a1c04;border-color:#d97706">
+      <div class="kpi-label">Receivables from Members</div>
+      <div class="kpi-value" style="color:#fcd34d">${fmtMoney(recv)}</div>
+      <div class="kpi-sub">Unpaid contributions owed to pool</div>
+    </div>
+    <div class="kpi-card" style="background:#091630;border-color:#2563eb">
+      <div class="kpi-label">Payables to Members</div>
+      <div class="kpi-value" style="color:#93c5fd">${fmtMoney(pay)}</div>
+      <div class="kpi-sub">Pool owes members for expenses paid</div>
+    </div>
+    <div class="kpi-card" style="background:#260c0c;border-color:#dc2626">
+      <div class="kpi-label">Total Expenses</div>
+      <div class="kpi-value" style="color:#fca5a5">${fmtMoney(exp)}</div>
+      <div class="kpi-sub">${data.expenses.length} transaction${data.expenses.length!==1?'s':''}</div>
+    </div>
+  `;
+}
+
+// ===================== DASHBOARD =====================
+function renderDashboard() {
+  renderKPIs();
+  const mon = currentMonth();
+  const monLabel = new Date(mon+'-01').toLocaleDateString('en-PK',{month:'long',year:'numeric'});
+  document.getElementById('contribMonthLabel').textContent = monLabel;
+
+  const paid = MEMBERS.filter(m => data.contributions.some(c => c.member===m && c.month===mon && !c.note?.includes('Rung penalty')));
+  document.getElementById('contribProgress').textContent = `${paid.length}/${MEMBERS.length} paid`;
+
+  // --- Receivables from members (who hasn't paid this month + active months) ---
+  const months = [...new Set(data.contributions.map(c=>c.month))];
+  if(!months.includes(mon)) months.push(mon);
+  const unpaidRows = [];
+  months.sort().forEach(m => {
+    MEMBERS.forEach(member => {
+      const hasPaid = data.contributions.some(c => c.member===member && c.month===m && !c.note?.includes('Rung penalty'));
+      if(!hasPaid) {
+        const mLabel = new Date(m+'-01').toLocaleDateString('en-PK',{month:'short',year:'numeric'});
+        unpaidRows.push({ member, month: m, mLabel, amount: MEMBER_CONTRIB[member] });
+      }
+    });
+  });
+
+  const recvTotal = unpaidRows.reduce((s,r)=>s+r.amount,0);
+  document.getElementById('dashRecvTotal').textContent = recvTotal > 0 ? fmtMoney(recvTotal) : 'All clear';
+  document.getElementById('dashRecvList').innerHTML = unpaidRows.length === 0
+    ? '<div class="empty-state" style="padding:1.5rem"><div class="empty-icon" style="font-size:1.5rem">✅</div><div>All contributions collected</div></div>'
+    : unpaidRows.slice(0,6).map(r => `
+      <div class="member-row">
+        <div class="member-avatar" style="${avatarStyle(r.member)};width:32px;height:32px;font-size:0.75rem">${r.member[0]}</div>
+        <div style="flex:1">
+          <div style="font-size:0.85rem;font-weight:500">${r.member}</div>
+          <div style="font-size:0.72rem;color:var(--text-dim)">${r.mLabel}</div>
+        </div>
+        <span class="amount-tag" style="background:rgba(245,158,11,0.15);color:var(--amber)">${fmtMoney(r.amount)}</span>
+      </div>
+    `).join('') + (unpaidRows.length > 6 ? `<div style="padding:0.6rem 1.25rem;font-size:0.75rem;color:var(--text-dim)">+${unpaidRows.length-6} more → see Contributions tab</div>` : '');
+
+  // --- Payables to members (unsettled personal expenses) ---
+  const unsettled = data.receivables.filter(r=>!r.settled);
+  const payTotal = unsettled.reduce((s,r)=>s+Number(r.amount),0);
+  document.getElementById('dashPayTotal').textContent = payTotal > 0 ? fmtMoney(payTotal) : 'All clear';
+  document.getElementById('dashPayList').innerHTML = unsettled.length === 0
+    ? '<div class="empty-state" style="padding:1.5rem"><div class="empty-icon" style="font-size:1.5rem">✅</div><div>No pending reimbursements</div></div>'
+    : unsettled.map(r => `
+      <div class="member-row">
+        <div class="member-avatar" style="${avatarStyle(r.member)};width:32px;height:32px;font-size:0.75rem">${r.member[0]}</div>
+        <div style="flex:1">
+          <div style="font-size:0.85rem;font-weight:500">${r.member}</div>
+          <div style="font-size:0.72rem;color:var(--text-dim)">${r.desc}</div>
+        </div>
+        <button class="toggle-btn" onclick="settleReceivable('${r.id}')" style="font-size:0.7rem">Settle</button>
+        <span class="amount-tag" style="background:rgba(37,99,235,0.12);color:var(--blue-light)">${fmtMoney(r.amount)}</span>
+      </div>
+    `).join('');
+
+  // --- This month member status ---
+  document.getElementById('dashMemberStatus').innerHTML = MEMBERS.map(m => {
+    const contrib = data.contributions.find(c => c.member===m && c.month===mon && !c.note?.includes('Rung penalty'));
+    const expected = MEMBER_CONTRIB[m];
+    const isPaid = !!contrib;
+    return `
+      <div class="member-row">
+        <div class="member-avatar" style="${avatarStyle(m)}">${m[0]}</div>
+        <div style="flex:1">
+          <div class="member-name">${m}</div>
+          <div class="member-role">${isPaid ? 'Paid '+fmtDate(contrib?.date||mon+'-01') : 'Pending'}</div>
+        </div>
+        <div class="status-dot ${isPaid?'paid':'unpaid'}"></div>
+        <span class="amount-tag ${isPaid?'green':'gold'}">${isPaid ? fmtMoney(contrib.amount) : fmtMoney(expected)+' due'}</span>
+      </div>
+    `;
+  }).join('');
+
+  // --- Recent expenses ---
+  const recent = [...data.expenses].sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
+  const recTotal = data.expenses.reduce((s,e)=>s+Number(e.amount),0);
+  document.getElementById('recentExpTotal').textContent = fmtMoney(recTotal) + ' total';
+  document.getElementById('recentExpList').innerHTML = recent.length === 0
+    ? '<div class="empty-state"><div class="empty-icon">💸</div><div>No expenses yet</div></div>'
+    : recent.map(e => {
+        const retreatName = e.retreat ? (data.retreats.find(r=>r.id===e.retreat)||{name:null}).name : null;
+        return `
+          <div class="member-row">
+            <span class="category-chip ${catClass(e.category)}">${e.category}</span>
+            <div style="flex:1">
+              <div style="font-size:0.85rem;font-weight:500">${e.desc}</div>
+              <div style="font-size:0.72rem;color:var(--text-dim)">${fmtDate(e.date)} · ${retreatName?'🏕️ '+retreatName:'General'}</div>
+            </div>
+            <span style="font-family:'DM Mono';font-size:0.82rem;color:var(--red-light)">${fmtMoney(e.amount)}</span>
+          </div>
+        `;
+      }).join('');
+}
+
+// ===================== CONTRIBUTIONS =====================
+function renderContributions() {
+  buildMonthSelector();
+  const mon = selectedMonth;
+  const monLabel = new Date(mon+'-01').toLocaleDateString('en-PK',{month:'long',year:'numeric'});
+  document.getElementById('contribCardTitle').textContent = monLabel;
+
+  const monthContribs = data.contributions.filter(c => c.month === mon);
+  const monthTotal = monthContribs.reduce((s,c)=>s+Number(c.amount),0);
+  document.getElementById('contribMonthTotal').textContent = fmtMoney(monthTotal);
+  document.getElementById('totalPoolDisplay').textContent = fmtMoney(totalContributions());
+
+  document.getElementById('contribMemberList').innerHTML = MEMBERS.map(m => {
+    const contrib = data.contributions.find(c => c.member===m && c.month===mon);
+    const expected = MEMBER_CONTRIB[m];
+    return `
+      <div class="member-row">
+        <div class="member-avatar" style="${avatarStyle(m)}">${m[0]}</div>
+        <div style="flex:1">
+          <div class="member-name">${m}</div>
+          <div class="member-role">Expected: ${fmtMoney(expected)}</div>
+        </div>
+        ${contrib
+          ? `<span class="amount-tag green">${fmtMoney(contrib.amount)}</span>
+             <button class="btn-danger" onclick="deleteContrib('${contrib.id}')">✕</button>`
+          : `<span class="amount-tag gold">${fmtMoney(expected)} due</span>
+             <button class="toggle-btn" onclick="quickMarkPaid('${m}','${mon}',${expected})">Mark Paid</button>`
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+function addContribution() {
+  const member = document.getElementById('contrib_member').value;
+  const month = document.getElementById('contrib_month').value;
+  const amount = Number(document.getElementById('contrib_amount').value);
+  const note = document.getElementById('contrib_note').value;
+
+  if(!month || !amount) { showToast('Please fill month and amount'); return; }
+
+  data.contributions.push({ id: uid(), member, month, amount, note, date: new Date().toISOString().slice(0,10) });
+  save();
+  renderAll();
+  document.getElementById('contrib_amount').value = '';
+  document.getElementById('contrib_note').value = '';
+  showToast(`✓ ${member}'s contribution recorded`);
+}
+
+function quickMarkPaid(member, month, amount) {
+  data.contributions.push({ id: uid(), member, month, amount, note: '', date: new Date().toISOString().slice(0,10) });
+  save(); renderAll();
+  showToast(`✓ ${member} marked as paid`);
+}
+
+function deleteContrib(id) {
+  data.contributions = data.contributions.filter(c => c.id !== id);
+  save(); renderAll();
+  showToast('Contribution removed');
+}
+
+// ===================== EXPENSES =====================
+function renderExpenses() {
+  const total = totalExpenses();
+  document.getElementById('expTotalLabel').textContent = fmtMoney(total);
+
+  const sorted = [...data.expenses].sort((a,b) => b.date.localeCompare(a.date));
+  const tbody = document.getElementById('expenseTableBody');
+  tbody.innerHTML = sorted.map(e => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:0.78rem;white-space:nowrap">${fmtDate(e.date)}</td>
+      <td>
+        <div style="font-weight:500">${e.desc}</div>
+        ${e.note ? `<div style="font-size:0.72rem;color:var(--text-dim)">${e.note}</div>` : ''}
+      </td>
+      <td><span class="category-chip ${catClass(e.category)}">${e.category}</span></td>
+      <td style="color:var(--text-muted);font-size:0.8rem">${e.retreat ? (data.retreats.find(r=>r.id===e.retreat)||{name:'—'}).name : '—'}</td>
+      <td style="font-size:0.82rem">${e.paidby==='pool'?'<span style="color:var(--text-dim)">Pool</span>':e.paidby}</td>
+      <td style="text-align:right;font-family:'DM Mono';color:var(--red-light)">${fmtMoney(e.amount)}</td>
+      <td><button class="btn-danger" onclick="deleteExpense('${e.id}')">✕</button></td>
+    </tr>
+  `).join('');
+
+  document.getElementById('expenseEmpty').style.display = sorted.length ? 'none' : 'block';
+  if(!sorted.length) tbody.innerHTML = '';
+}
+
+function addExpense() {
+  const desc = document.getElementById('exp_desc').value.trim();
+  const amount = Number(document.getElementById('exp_amount').value);
+  const date = document.getElementById('exp_date').value;
+  const category = document.getElementById('exp_category').value;
+  const retreat = expenseMode === 'retreat' ? document.getElementById('exp_retreat').value : '';
+  const paidby = document.getElementById('exp_paidby').value;
+  const note = document.getElementById('exp_note').value;
+
+  if(!desc || !amount || !date) { showToast('Please fill description, amount and date'); return; }
+  if(expenseMode === 'retreat' && !retreat) { showToast('Please select a retreat, or switch to General Expense'); return; }
+
+  // If paid by a member, auto-add payable
+  if(paidby !== 'pool') {
+    const retreatName = retreat ? (data.retreats.find(r=>r.id===retreat)||{name:''}).name : '';
+    data.receivables.push({ id: uid(), member: paidby, desc, amount, date, category, retreat, note: retreatName ? 'For: '+retreatName : 'General pool expense', settled: false });
+  }
+
+  data.expenses.push({ id: uid(), desc, amount, date, category, retreat, paidby, note });
+  save(); renderAll();
+  ['exp_desc','exp_amount','exp_note'].forEach(id => document.getElementById(id).value = '');
+  showToast(`✓ Expense logged${paidby!=='pool'?' — payable auto-created for '+paidby:''}${retreat?' 🏕️ tagged to retreat':''}`);
+}
+
+function deleteExpense(id) {
+  data.expenses = data.expenses.filter(e => e.id !== id);
+  save(); renderAll();
+  showToast('Expense removed');
+}
+
+// ===================== RECEIVABLES =====================
+function renderReceivables() {
+  const unsettled = data.receivables.filter(r=>!r.settled).reduce((s,r)=>s+Number(r.amount),0);
+  document.getElementById('recvTotalLabel').textContent = 'Unsettled: ' + fmtMoney(unsettled);
+  const sorted = [...data.receivables].sort((a,b) => {
+    if(a.settled !== b.settled) return a.settled ? 1 : -1;
+    return b.date.localeCompare(a.date);
+  });
+
+  const container = document.getElementById('receivablesList');
+  if(!sorted.length) {
+    document.getElementById('receivablesEmpty').style.display = 'block';
+    container.innerHTML = '';
+    return;
+  }
+
+  document.getElementById('receivablesEmpty').style.display = 'none';
+  container.innerHTML = sorted.map(r => `
+    <div class="receivable-row" style="${r.settled?'opacity:0.5':''}">
+      <div class="member-avatar" style="${avatarStyle(r.member)};width:34px;height:34px;font-size:0.82rem">${r.member[0]}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:500;font-size:0.88rem">${r.member} — ${r.desc}</div>
+        <div style="font-size:0.72rem;color:var(--text-dim)">${fmtDate(r.date)} · <span class="${catClass(r.category)} category-chip" style="padding:1px 6px">${r.category}</span> ${r.retreat?'· '+r.retreat:''}</div>
+      </div>
+      <span class="settled-badge ${r.settled?'yes':'no'}">${r.settled?'Settled':'Pending'}</span>
+      <span style="font-family:'DM Mono';font-size:0.82rem;color:var(--blue-light);margin:0 0.5rem">${fmtMoney(r.amount)}</span>
+      ${!r.settled ? `<button class="toggle-btn" onclick="settleReceivable('${r.id}')">Settle</button>` : ''}
+      <button class="btn-danger" onclick="deleteReceivable('${r.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function addReceivable() {
+  const member = document.getElementById('recv_member').value;
+  const desc = document.getElementById('recv_desc').value.trim();
+  const amount = Number(document.getElementById('recv_amount').value);
+  const date = document.getElementById('recv_date').value;
+  const category = document.getElementById('recv_category').value;
+  const retreat = document.getElementById('recv_retreat').value;
+  const note = document.getElementById('recv_note').value;
+
+  if(!desc || !amount || !date) { showToast('Fill description, amount and date'); return; }
+
+  data.receivables.push({ id: uid(), member, desc, amount, date, category, retreat, note, settled: false });
+  save(); renderAll();
+  ['recv_desc','recv_amount','recv_date','recv_note'].forEach(id => document.getElementById(id).value = '');
+  showToast(`✓ Receivable added for ${member}`);
+}
+
+function settleReceivable(id) {
+  const r = data.receivables.find(x=>x.id===id);
+  if(r) { r.settled = true; save(); renderAll(); showToast('✓ Marked as settled'); }
+}
+
+function deleteReceivable(id) {
+  data.receivables = data.receivables.filter(r => r.id !== id);
+  save(); renderAll(); showToast('Receivable removed');
+}
+
+// ===================== RUNG =====================
+function renderRung() {
+  const total = rungPenaltiesTotal();
+  document.getElementById('rungTotalLabel').textContent = 'Total penalties: ' + fmtMoney(total);
+
+  const sorted = [...data.rungResults].sort((a,b)=>b.date.localeCompare(a.date));
+  const container = document.getElementById('rungList');
+  document.getElementById('rungEmpty').style.display = sorted.length ? 'none' : 'block';
+  if(!sorted.length) { container.innerHTML=''; return; }
+
+  container.innerHTML = sorted.map(r => `
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+        <div>
+          <span style="font-weight:600">${r.name||'Tournament'}</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);margin-left:0.75rem">${fmtDate(r.date)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <span style="font-family:'DM Mono';font-size:0.8rem;color:var(--blue-light)">+${fmtMoney(r.losers.length*2500)} to pool</span>
+          <button class="btn-danger" onclick="deleteRung('${r.id}')">✕</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue-light);margin-bottom:0.4rem">🏆 Winners</div>
+          ${r.winners.map(w=>`<span class="amount-tag green" style="display:inline-block;margin:2px">${w}</span>`).join('')}
+        </div>
+        <div style="flex:1;min-width:140px">
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--red-light);margin-bottom:0.4rem">💀 Losers (Rs. 2,500 each)</div>
+          ${r.losers.map(l=>`<span class="amount-tag red" style="display:inline-block;margin:2px">${l}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addRungResult() {
+  const date = document.getElementById('rung_date').value;
+  const name = document.getElementById('rung_name').value || 'Tournament';
+  const w1 = document.getElementById('win1').value;
+  const w2 = document.getElementById('win2').value;
+  const l1 = document.getElementById('lose1').value;
+  const l2 = document.getElementById('lose2').value;
+
+  if(!date) { showToast('Please select a date'); return; }
+  const winners = [w1,w2].filter(Boolean);
+  const losers = [l1,l2].filter(Boolean);
+  if(!losers.length) { showToast('Select at least one loser'); return; }
+
+  // Auto-add contributions for losers
+  losers.forEach(l => {
+    data.contributions.push({ id: uid(), member: l, month: date.slice(0,7), amount: 2500, note: 'Rung penalty — ' + name, date });
+  });
+
+  data.rungResults.push({ id: uid(), date, name, winners, losers });
+  save(); renderAll();
+  ['rung_date','rung_name'].forEach(id => document.getElementById(id).value='');
+  ['win1','win2','lose1','lose2'].forEach(id => document.getElementById(id).value='');
+  showToast(`✓ Tournament recorded — ${fmtMoney(losers.length*2500)} added to pool`);
+}
+
+function deleteRung(id) {
+  const r = data.rungResults.find(x=>x.id===id);
+  if(r) {
+    // Remove auto-added penalty contributions
+    data.contributions = data.contributions.filter(c => !(c.note && c.note.includes('Rung penalty') && r.losers.includes(c.member) && c.date === r.date));
+  }
+  data.rungResults = data.rungResults.filter(x=>x.id!==id);
+  save(); renderAll(); showToast('Tournament removed');
+}
+
+// ===================== RETREATS =====================
+function renderRetreats() {
+  const list = document.getElementById('retreatList');
+  document.getElementById('retreatEmpty').style.display = data.retreats.length ? 'none' : 'block';
+  if(!data.retreats.length) { list.innerHTML = ''; return; }
+
+  const sorted = [...data.retreats].sort((a,b) => (b.startDate||b.date||'').localeCompare(a.startDate||a.date||''));
+  list.innerHTML = sorted.map(r => {
+    const spent = data.expenses.filter(e => e.retreat === r.id).reduce((s,e) => s+Number(e.amount), 0);
+    const pct = r.budget > 0 ? Math.min(100, Math.round(spent/r.budget*100)) : 0;
+    const statusColor = { planned:'var(--blue)', completed:'var(--green-light)', cancelled:'var(--text-dim)' };
+    const dateRange = r.startDate && r.endDate
+      ? fmtDate(r.startDate) + ' → ' + fmtDate(r.endDate)
+      : r.startDate ? fmtDate(r.startDate)
+      : r.date ? fmtDate(r.date) : '—';
+    const retreatExpenses = data.expenses.filter(e => e.retreat === r.id);
+    return `
+      <div class="retreat-card" style="margin-bottom:1rem">
+        <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:0.25rem">
+          <div>
+            <div class="retreat-name">${r.name}</div>
+            <div class="retreat-meta">${r.dest||'Location TBD'} · ${dateRange}</div>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <span style="font-size:0.72rem;padding:3px 10px;border-radius:4px;background:${statusColor[r.status]}22;color:${statusColor[r.status]};text-transform:uppercase;letter-spacing:0.08em">${r.status}</span>
+            <button class="btn-danger" onclick="deleteRetreat('${r.id}')">✕</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1rem 0">
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">Budget</div>
+            <div style="font-family:'DM Mono';color:var(--blue-light)">${fmtMoney(r.budget)}</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">Spent</div>
+            <div style="font-family:'DM Mono';color:var(--red-light)">${fmtMoney(spent)}</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">Remaining</div>
+            <div style="font-family:'DM Mono';color:${r.budget-spent<0?'var(--red-light)':'var(--green-light)'}">${fmtMoney(r.budget-spent)}</div>
+          </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.4rem">${pct}% of budget used · ${retreatExpenses.length} expense${retreatExpenses.length!==1?'s':''}</div>
+        <div class="retreat-budget-bar"><div class="retreat-budget-fill" style="width:${pct}%;background:${pct>90?'var(--red)':pct>70?'var(--amber)':'linear-gradient(90deg,var(--blue),var(--blue-light))'}"></div></div>
+        ${retreatExpenses.length ? `
+        <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.75rem">
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.5rem">Tagged Expenses</div>
+          ${retreatExpenses.map(e=>`
+            <div style="display:flex;gap:0.75rem;align-items:center;padding:4px 0;font-size:0.82rem">
+              <span class="category-chip ${catClass(e.category)}">${e.category}</span>
+              <span style="flex:1;color:var(--text)">${e.desc}</span>
+              <span style="font-family:'DM Mono';color:var(--red-light)">${fmtMoney(e.amount)}</span>
+            </div>
+          `).join('')}
+        </div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function addRetreat() {
+  const name = document.getElementById('ret_name').value.trim();
+  const startDate = document.getElementById('ret_start').value;
+  const endDate = document.getElementById('ret_end').value;
+  const budget = Number(document.getElementById('ret_budget').value);
+  const dest = document.getElementById('ret_dest').value;
+  const status = document.getElementById('ret_status').value;
+
+  if(!name || !startDate) { showToast('Fill name and start date'); return; }
+
+  const id = uid();
+  data.retreats.push({ id, name, startDate, endDate, budget, dest, status });
+  save();
+  updateRetreatDropdowns();
+  renderAll();
+  ['ret_name','ret_start','ret_end','ret_budget','ret_dest'].forEach(i => document.getElementById(i).value='');
+  showToast('✓ Retreat added');
+}
+
+function deleteRetreat(id) {
+  data.retreats = data.retreats.filter(r=>r.id!==id);
+  save(); updateRetreatDropdowns(); renderAll();
+  showToast('Retreat removed');
+}
+
+function updateRetreatDropdowns() {
+  const retreatOpts = data.retreats.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  const expEl = document.getElementById('exp_retreat');
+  if(expEl) expEl.innerHTML = '<option value="">— Choose a retreat —</option>' + retreatOpts;
+  const recvEl = document.getElementById('recv_retreat');
+  if(recvEl) recvEl.innerHTML = '<option value="">— General —</option>' + retreatOpts;
+}
+
+// ===================== ANALYTICS =====================
+const CAT_COLORS = {
+  food: '#f59e0b', travel: '#2563eb', entertainment: '#dc2626',
+  logistics: '#16a34a', other: '#374151'
+};
+const CAT_LABELS = { food:'Food', travel:'Travel', entertainment:'Entertainment', logistics:'Logistics', other:'Other' };
+
+function renderAnalytics() {
+  const container = document.getElementById('analyticsContent');
+  if(!container) return;
+  const exps = data.expenses;
+  if(!exps.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div>No expense data yet</div></div>';
+    return;
+  }
+
+  // Category totals
+  const cats = ['food','travel','entertainment','logistics','other'];
+  const catTotals = {};
+  cats.forEach(c => catTotals[c] = exps.filter(e=>e.category===c).reduce((s,e)=>s+Number(e.amount),0));
+  const grandTotal = Object.values(catTotals).reduce((a,b)=>a+b,0);
+  const maxCat = Math.max(...Object.values(catTotals));
+
+  // Member spend (paid by member, not pool)
+  const memberSpend = {};
+  MEMBERS.forEach(m => memberSpend[m] = exps.filter(e=>e.paidby===m).reduce((s,e)=>s+Number(e.amount),0));
+
+  // Monthly trend
+  const monthlyMap = {};
+  exps.forEach(e => {
+    const mon = e.date.slice(0,7);
+    monthlyMap[mon] = (monthlyMap[mon]||0) + Number(e.amount);
+  });
+  const months = Object.keys(monthlyMap).sort();
+  const maxMonth = Math.max(...Object.values(monthlyMap), 1);
+
+  // Retreat spending
+  const retreatData = data.retreats.map(r => ({
+    name: r.name,
+    budget: r.budget,
+    spent: exps.filter(e=>e.retreat===r.id).reduce((s,e)=>s+Number(e.amount),0)
+  })).filter(r=>r.budget>0||r.spent>0);
+
+  container.innerHTML = `
+    <!-- Row 1: Category breakdown + donut-style -->
+    <div class="grid-2" style="margin-bottom:1.5rem">
+      <div class="card">
+        <div class="card-header"><span class="card-title">By Category</span><span style="font-family:'DM Mono';font-size:0.78rem;color:var(--text-muted)">${fmtMoney(grandTotal)} total</span></div>
+        <div style="padding:1.25rem">
+          ${cats.filter(c=>catTotals[c]>0).map(c => {
+            const pct = grandTotal > 0 ? Math.round(catTotals[c]/grandTotal*100) : 0;
+            const barPct = maxCat > 0 ? Math.round(catTotals[c]/maxCat*100) : 0;
+            return `
+              <div style="margin-bottom:1rem">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                  <div style="display:flex;align-items:center;gap:0.5rem">
+                    <span style="width:10px;height:10px;border-radius:2px;background:${CAT_COLORS[c]};display:inline-block"></span>
+                    <span style="font-size:0.82rem;font-weight:500">${CAT_LABELS[c]}</span>
+                    <span style="font-size:0.7rem;color:var(--text-dim)">${exps.filter(e=>e.category===c).length} txn${exps.filter(e=>e.category===c).length!==1?'s':''}</span>
+                  </div>
+                  <div style="text-align:right">
+                    <span style="font-family:'DM Mono';font-size:0.82rem;color:var(--text)">${fmtMoney(catTotals[c])}</span>
+                    <span style="font-size:0.7rem;color:var(--text-dim);margin-left:6px">${pct}%</span>
+                  </div>
+                </div>
+                <div style="background:var(--surface);border-radius:3px;height:6px;overflow:hidden">
+                  <div style="height:100%;width:${barPct}%;background:${CAT_COLORS[c]};border-radius:3px;transition:width 0.6s ease"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Category Share</span></div>
+        <div style="padding:1.25rem;display:flex;flex-direction:column;justify-content:center;min-height:200px">
+          <!-- Stacked bar chart -->
+          <div style="display:flex;height:36px;border-radius:6px;overflow:hidden;margin-bottom:1.25rem">
+            ${cats.filter(c=>catTotals[c]>0).map(c=>{
+              const pct = grandTotal>0?catTotals[c]/grandTotal*100:0;
+              return `<div style="width:${pct}%;background:${CAT_COLORS[c]};transition:width 0.6s" title="${CAT_LABELS[c]}: ${fmtMoney(catTotals[c])}"></div>`;
+            }).join('')}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1rem">
+            ${cats.filter(c=>catTotals[c]>0).map(c=>`
+              <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem">
+                <span style="width:10px;height:10px;flex-shrink:0;border-radius:2px;background:${CAT_COLORS[c]}"></span>
+                <span style="color:var(--text-muted)">${CAT_LABELS[c]}</span>
+                <span style="margin-left:auto;font-family:'DM Mono';font-size:0.72rem;color:var(--text)">${Math.round(catTotals[c]/grandTotal*100)}%</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Monthly trend -->
+    <div class="section-title">Monthly Spend Trend</div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header"><span class="card-title">Month-by-Month</span></div>
+      <div style="padding:1.5rem 1.25rem 1rem">
+        <div style="display:flex;gap:1rem;align-items:flex-end;min-height:120px">
+          ${months.map(mon => {
+            const val = monthlyMap[mon];
+            const barH = Math.round(val/maxMonth*100);
+            const label = new Date(mon+'-01').toLocaleDateString('en-PK',{month:'short',year:'2-digit'});
+            return `
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:40px">
+                <span style="font-family:'DM Mono';font-size:0.65rem;color:var(--text-dim);writing-mode:horizontal-tb;white-space:nowrap">${fmtMoney(val).replace('Rs. ','')}</span>
+                <div style="width:100%;background:var(--surface);border-radius:4px 4px 0 0;height:100px;display:flex;align-items:flex-end">
+                  <div style="width:100%;height:${barH}%;background:linear-gradient(180deg,var(--gold),var(--amber));border-radius:4px 4px 0 0;transition:height 0.6s;min-height:3px"></div>
+                </div>
+                <span style="font-size:0.68rem;color:var(--text-muted)">${label}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Member spend + retreat comparison -->
+    <div class="grid-2">
+      <div>
+        <div class="section-title">Who Spent from Pocket</div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Member Expenditure</span><span style="font-size:0.72rem;color:var(--text-dim)">Personal pool expenses</span></div>
+          <div style="padding:1.25rem">
+            ${MEMBERS.map(m => {
+              const amt = memberSpend[m]||0;
+              const pct = grandTotal>0?Math.round(amt/grandTotal*100):0;
+              const barPct = Math.max(...Object.values(memberSpend),1)>0?Math.round(amt/Math.max(...Object.values(memberSpend),1)*100):0;
+              return `
+                <div style="margin-bottom:0.9rem">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                    <div style="display:flex;align-items:center;gap:0.5rem">
+                      <div class="member-avatar" style="${avatarStyle(m)};width:24px;height:24px;font-size:0.65rem">${m[0]}</div>
+                      <span style="font-size:0.82rem">${m}</span>
+                    </div>
+                    <span style="font-family:'DM Mono';font-size:0.78rem;color:${amt>0?'var(--amber)':'var(--text-dim)'}">${amt>0?fmtMoney(amt):'—'}</span>
+                  </div>
+                  <div style="background:var(--surface);border-radius:3px;height:5px;overflow:hidden">
+                    <div style="height:100%;width:${barPct}%;background:${MEMBER_COLORS[m]};border-radius:3px"></div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Retreat Budget vs Actual</div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Retreat Spending</span></div>
+          ${retreatData.length === 0
+            ? '<div class="empty-state" style="padding:2rem"><div class="empty-icon">🏕️</div><div>No retreat data</div></div>'
+            : `<div style="padding:1.25rem">
+                ${retreatData.map(r=>{
+                  const spentPct = r.budget>0?Math.min(100,Math.round(r.spent/r.budget*100)):0;
+                  return `
+                    <div style="margin-bottom:1.1rem">
+                      <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.82rem">
+                        <span style="font-weight:500">${r.name}</span>
+                        <span style="font-family:'DM Mono';font-size:0.75rem;color:var(--text-muted)">${fmtMoney(r.spent)} / ${fmtMoney(r.budget)}</span>
+                      </div>
+                      <div style="background:var(--surface);border-radius:4px;height:8px;overflow:hidden">
+                        <div style="height:100%;width:${spentPct}%;background:${spentPct>90?'var(--crimson)':spentPct>70?'var(--amber)':'var(--green)'};border-radius:4px;transition:width 0.6s"></div>
+                      </div>
+                      <div style="font-size:0.68rem;color:var(--text-dim);margin-top:2px">${spentPct}% utilised</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>`
+          }
+        </div>
+      </div>
+    </div>
+  `;
+}
+function renderAll() {
+  renderDashboard();
+  renderContributions();
+  renderExpenses();
+  renderReceivables();
+  renderRung();
+  renderRetreats();
+  renderAnalytics();
+}
+
+function saveOpeningBalance() {
+  const val = Number(document.getElementById('openingBalanceInput').value) || 0;
+  data.openingBalance = val;
+  save(); renderAll();
+  showToast('✓ Opening balance saved — ' + fmtMoney(val));
+}
+
+function focusOpeningBalance() {
+  switchTab('dashboard');
+  document.querySelectorAll('.nav-btn').forEach((b,i) => { if(i===0) b.classList.add('active'); else b.classList.remove('active'); });
+  setTimeout(() => {
+    const inp = document.getElementById('openingBalanceInput');
+    if(inp) { inp.focus(); inp.select(); inp.scrollIntoView({ behavior:'smooth', block:'center' }); }
+  }, 100);
+}
+function init() {
+  // Set current month badge
+  const now = new Date();
+  document.getElementById('currentMonthBadge').textContent =
+    now.toLocaleDateString('en-PK',{month:'short',year:'numeric'}).toUpperCase();
+
+  // Default dates
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('exp_date').value = today;
+  document.getElementById('recv_date').value = today;
+  document.getElementById('contrib_month').value = currentMonth();
+
+  // Default amounts by member
+  document.getElementById('contrib_member').addEventListener('change', function() {
+    document.getElementById('contrib_amount').value = MEMBER_CONTRIB[this.value] || 3000;
+  });
+  document.getElementById('contrib_amount').value = MEMBER_CONTRIB['Umair'];
+
+  // Load opening balance
+  if(data.openingBalance) document.getElementById('openingBalanceInput').value = data.openingBalance;
+
+  updateRetreatDropdowns();
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
