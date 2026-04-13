@@ -808,7 +808,7 @@ select option { background: var(--card); }
             <button class="btn btn-outline" onclick="manualSync()" style="font-size:0.82rem">↻ Sync Now</button>
             <button class="btn btn-outline" onclick="disconnectGas()" style="font-size:0.82rem;color:var(--red-light);border-color:var(--red-dim)">Disconnect</button>
           </div>
-          <div style="margin-top:1rem;padding:0.85rem;background:var(--surface);border-radius:8px;font-size:0.78rem;color:var(--text-muted);line-height:1.7">
+          <div id="gasSetupInstructions" style="margin-top:1rem;padding:0.85rem;background:var(--surface);border-radius:8px;font-size:0.78rem;color:var(--text-muted);line-height:1.7">
             <div style="color:var(--blue-light);font-weight:600;margin-bottom:0.4rem">How to set up:</div>
             <div>1. Go to <strong style="color:var(--text)">script.google.com</strong> → New Project</div>
             <div>2. Paste the <strong style="color:var(--text)">PeeraClub_GAS.gs</strong> code</div>
@@ -1311,6 +1311,11 @@ async function manualSync() {
 }
 
 // ---- GAS URL management ----
+function setSetupVisible(show) {
+  const el = document.getElementById('gasSetupInstructions');
+  if (el) el.style.display = show ? 'block' : 'none';
+}
+
 function saveGasUrl() {
   const url = document.getElementById('gasUrlInput').value.trim();
   if (!url || !url.startsWith('https://script.google.com')) {
@@ -1318,6 +1323,7 @@ function saveGasUrl() {
   }
   GAS_URL = url;
   localStorage.setItem(GAS_URL_KEY, GAS_URL);
+  setSetupVisible(false);
   showToast('✓ Connected — syncing now…');
   manualSync().then(() => renderAll());
 }
@@ -1327,6 +1333,7 @@ function disconnectGas() {
   localStorage.removeItem(GAS_URL_KEY);
   document.getElementById('gasUrlInput').value = '';
   setSyncState('', 'Not connected');
+  setSetupVisible(true);
   showToast('Disconnected from Google Sheets');
 }
 
@@ -2131,9 +2138,11 @@ async function init() {
   // Pre-fill GAS URL if saved
   if (GAS_URL) {
     document.getElementById('gasUrlInput').value = GAS_URL;
+    setSetupVisible(false);
     setSyncState('syncing', 'Loading…');
     await loadFromGAS();
   } else {
+    setSetupVisible(true);
     setSyncState('', 'Not connected');
     showLoading(false);
   }
